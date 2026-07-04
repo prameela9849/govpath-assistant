@@ -10,7 +10,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { getService, SERVICES } from "@/lib/services-data";
+import { getService, SERVICES, type Service } from "@/lib/services-data";
 
 export const Route = createFileRoute("/services/$id")({
   loader: ({ params }) => {
@@ -39,8 +39,8 @@ export const Route = createFileRoute("/services/$id")({
 });
 
 function ServiceDetail() {
-  const { svc } = Route.useLoaderData();
-  const related = svc.related.map(getService).filter(Boolean).slice(0, 3);
+  const { svc } = Route.useLoaderData() as { svc: Service };
+  const related = svc.related.map(getService).filter((s): s is Service => Boolean(s)).slice(0, 3);
 
   return (
     <AppShell>
@@ -131,9 +131,9 @@ function ServiceDetail() {
               <h3 className="font-semibold">You may also need</h3>
               <div className="mt-3 space-y-2">
                 {related.map((r) => (
-                  <Link key={r!.id} to="/services/$id" params={{ id: r!.id }} className="block rounded-lg border p-3 hover:border-primary transition-colors">
-                    <div className="text-sm font-medium">{r!.name}</div>
-                    <div className="text-xs text-muted-foreground line-clamp-1">{r!.description}</div>
+                  <Link key={r.id} to="/services/$id" params={{ id: r.id }} className="block rounded-lg border p-3 hover:border-primary transition-colors">
+                    <div className="text-sm font-medium">{r.name}</div>
+                    <div className="text-xs text-muted-foreground line-clamp-1">{r.description}</div>
                   </Link>
                 ))}
               </div>
