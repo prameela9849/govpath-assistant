@@ -77,14 +77,20 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
-      { name: "description", content: "Lovable Generated Project" },
-      { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "Lovable Generated Project" },
+      { title: "GovAssist AI — One assistant for every government service" },
+      {
+        name: "description",
+        content:
+          "AI-powered assistant that guides citizens through Aadhaar, PAN, Passport, certificates and more. Chat, upload, auto-fill and track applications in one place.",
+      },
+      { name: "author", content: "GovAssist AI" },
+      { property: "og:title", content: "GovAssist AI — One assistant for every government service" },
+      {
+        property: "og:description",
+        content: "Chat, upload documents, auto-fill forms and track government applications with AI.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:site", content: "@Lovable" },
     ],
     links: [
       {
