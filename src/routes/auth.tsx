@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
+import { signIn, signUp } from "@/services/auth";
 
 export const Route = createFileRoute("/auth")({
   head: () => ({ meta: [{ title: "Sign in — GovAssist AI" }] }),
@@ -17,16 +18,78 @@ function AuthPage() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
 
+  const [fullName, setFullName] = useState("");
+
+  const [email, setEmail] = useState("");
+
+  const [password, setPassword] = useState("");
+
+  const [confirmPassword, setConfirmPassword] = useState("");
+
+  const [tab, setTab] = useState("signin");
+
   // TODO: Replace with supabase.auth.signInWithPassword / signUp when Cloud is enabled.
-  function handleAuth(e: React.FormEvent) {
-    e.preventDefault();
-    setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      toast.success("Signed in (mock). Welcome to GovAssist AI!");
+  async function handleAuth(e: React.FormEvent) {
+  e.preventDefault();
+
+  setLoading(true);
+
+  try {
+    if (tab === "signup") {
+
+      if (password !== confirmPassword) {
+        toast.error("Passwords do not match.");
+        return;
+      }
+
+      const { data, error } = await signUp(email, password, fullName);
+
+      if (error) {
+        toast.error(error.message);
+        return;
+      }
+
+      // Save profile information
+      if (data.user) {
+        const { supabase } = await import("@/lib/supabase");
+
+        await supabase.from("profiles").upsert({
+          id: data.user.id,
+          full_name: fullName,
+        });
+      }
+
+      toast.success("Account created successfully!");
+
       navigate({ to: "/dashboard" });
-    }, 700);
+
+    } else {
+
+      const { error } = await signIn(email, password);
+
+      if (error) {
+        toast.error(error.message);
+        return;
+      }
+
+      toast.success("Welcome back!");
+
+      navigate({ to: "/dashboard" });
+
+    }
+
+  } catch (err) {
+
+    toast.error("Something went wrong.");
+
+    console.error(err);
+
+  } finally {
+
+    setLoading(false);
+
   }
+}
 
   return (
     <div className="min-h-screen grid md:grid-cols-2">
@@ -51,15 +114,15 @@ function AuthPage() {
             <h2 className="text-2xl font-semibold">Welcome back</h2>
             <p className="text-sm text-muted-foreground mt-1">Sign in or create an account to continue.</p>
           </div>
-          <Tabs defaultValue="signin">
+          <Tabs value={tab} onValueChange={setTab}>
             <TabsList className="grid grid-cols-2 w-full">
               <TabsTrigger value="signin">Sign in</TabsTrigger>
               <TabsTrigger value="signup">Sign up</TabsTrigger>
             </TabsList>
             <TabsContent value="signin">
               <form onSubmit={handleAuth} className="space-y-4 mt-4">
-                <Field icon={Mail} label="Email" type="email" placeholder="you@example.com" />
-                <Field icon={Lock} label="Password" type="password" placeholder="••••••••" />
+                <Field icon={Mail} label="Email" type="email" placeholder="you@example.com" value={email} onChange={setEmail} />
+                <Field icon={Lock} label="Password" type="password" placeholder="••••••••" value={password} onChange={setPassword} />
                 <div className="flex justify-end">
                   <button type="button" className="text-xs text-primary hover:underline" onClick={() => toast.info("Password reset link sent (mock)")}>Forgot password?</button>
                 </div>
@@ -68,9 +131,10 @@ function AuthPage() {
             </TabsContent>
             <TabsContent value="signup">
               <form onSubmit={handleAuth} className="space-y-4 mt-4">
-                <Field icon={User} label="Full name" placeholder="Ananya Sharma" />
-                <Field icon={Mail} label="Email" type="email" placeholder="you@example.com" />
-                <Field icon={Lock} label="Password" type="password" placeholder="Create a password" />
+                <Field icon={User} label="Full name" placeholder="Ananya Sharma" value={fullName} onChange={setFullName} />
+                <Field icon={Mail} label="Email" type="email" placeholder="you@example.com" value={email} onChange={setEmail} />
+                <Field icon={Lock} label="Password" type="password" placeholder="Create a password" value={password} onChange={setPassword} />
+                <Field icon={Lock} label="Confirm Password" type="password" placeholder="Confirm Password" value={confirmPassword} onChange={setConfirmPassword} />
                 <Button className="w-full gap-2" disabled={loading}>{loading ? "Creating…" : "Create account"} <ArrowRight className="h-4 w-4" /></Button>
               </form>
             </TabsContent>
@@ -84,13 +148,36 @@ function AuthPage() {
   );
 }
 
-function Field({ icon: Icon, label, type = "text", placeholder }: { icon: React.ComponentType<{ className?: string }>; label: string; type?: string; placeholder?: string }) {
+function Field({
+  icon: Icon,
+  label,
+  type = "text",
+  placeholder,
+  value,
+  onChange,
+}: {
+  icon: React.ComponentType<{ className?: string }>;
+  label: string;
+  type?: string;
+  placeholder?: string;
+  value: string;
+  onChange: (value: string) => void;
+}) {
   return (
     <div>
       <Label className="text-xs">{label}</Label>
+
       <div className="relative mt-1">
         <Icon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-        <Input type={type} placeholder={placeholder} className="pl-9" required />
+
+        <Input
+          type={type}
+          placeholder={placeholder}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          className="pl-9"
+          required
+        />
       </div>
     </div>
   );
