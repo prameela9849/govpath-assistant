@@ -1,4 +1,4 @@
-const API_URL = "http://localhost:5000/upload";
+const API_URL = "https://govpath-backend-1maa.onrender.com";
 
 export async function uploadDocument(file: File) {
   const formData = new FormData();
