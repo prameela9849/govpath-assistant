@@ -86,10 +86,10 @@ function ChatPage() {
 
     try {
       const result = await sendMessage(
-       q,
-       ocrText
-       documentType
-      );
+  q,
+  ocrText,
+  documentType
+);
 
       let serviceId: string | undefined;
 
