@@ -91,6 +91,12 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: "GovAssist AI — One assistant for every government service" },
+      { name: "description", content: "AI-powered assistant that guides citizens through Aadhaar, PAN, Passport, certificates and more. Chat, upload, auto-fill and track applications in one place." },
+      { property: "og:description", content: "AI-powered assistant that guides citizens through Aadhaar, PAN, Passport, certificates and more. Chat, upload, auto-fill and track applications in one place." },
+      { name: "twitter:description", content: "AI-powered assistant that guides citizens through Aadhaar, PAN, Passport, certificates and more. Chat, upload, auto-fill and track applications in one place." },
+      { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/x1vryNjCgDOCPHOurZOZeCELItp2/social-images/social-1783399701578-Screenshot_2026-07-07_101647.webp" },
+      { name: "twitter:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/x1vryNjCgDOCPHOurZOZeCELItp2/social-images/social-1783399701578-Screenshot_2026-07-07_101647.webp" },
     ],
     links: [
       {
