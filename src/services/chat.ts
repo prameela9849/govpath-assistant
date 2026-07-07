@@ -1,4 +1,4 @@
-const API_URL = "https://govpath-backend-1maa.onrender.com";
+const API_URL = "https://govpath-backend-1maa.onrender.com/chat";
 
 export async function sendMessage(
   message: string,
