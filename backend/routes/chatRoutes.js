@@ -5,17 +5,16 @@ const model = require("../config/gemini");
 const supabase = require("../config/supabase");
 
 router.post("/", async (req, res) => {
-
   console.log("=================================");
   console.log("CHAT REQUEST RECEIVED");
   console.log("Request Body:", req.body);
   console.log("=================================");
 
   try {
-
     const {
-     message,
-     ocrText,
+      message,
+      ocrText,
+      documentType,
     } = req.body;
 
     if (!message) {
@@ -42,7 +41,7 @@ router.post("/", async (req, res) => {
     console.log("Services fetched:", services.length);
 
     // Prompt for Gemini
-const prompt = `
+    const prompt = `
 You are GovAssist AI, an AI Government Service Assistant.
 
 Use ONLY the government service information provided below.
@@ -62,13 +61,13 @@ ${ocrText || "No document uploaded"}
 Instructions:
 
 1. If the service exists:
-   - Explain the service
-   - Mention eligibility
-   - Mention required documents
-   - Mention fees
-   - Mention processing time
-   - Mention official website
-   - Answer step-by-step
+   - Explain the service.
+   - Mention eligibility.
+   - Mention required documents.
+   - Mention fees.
+   - Mention processing time.
+   - Mention official website.
+   - Answer step-by-step.
 
 2. If the user uploaded a document:
    - Use the OCR text to answer.
@@ -76,7 +75,7 @@ Instructions:
    - Mention if any required information is missing.
 
 3. If the service does not exist:
-   Politely say it is unavailable.
+   - Politely say it is unavailable.
 
 4. Never invent information.
 `;
@@ -84,23 +83,15 @@ Instructions:
     let result;
 
     try {
-
       console.log("Sending prompt to Gemini...");
-
       result = await model.generateContent(prompt);
-
     } catch (error) {
-
       if (error.status === 503) {
-
         console.log("Gemini Busy. Waiting 2 seconds...");
-
-        await new Promise(resolve => setTimeout(resolve, 2000));
+        await new Promise((resolve) => setTimeout(resolve, 2000));
 
         console.log("Retrying Gemini...");
-
         result = await model.generateContent(prompt);
-
       } else {
         throw error;
       }
@@ -116,7 +107,6 @@ Instructions:
     });
 
   } catch (error) {
-
     console.error("Chat Route Error:");
     console.error(error);
 
@@ -130,10 +120,9 @@ Instructions:
 
     return res.status(500).json({
       success: false,
-      message: error.message,
+      message: error.message || "Internal Server Error",
     });
   }
-
 });
 
 module.exports = router;
