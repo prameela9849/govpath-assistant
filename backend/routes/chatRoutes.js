@@ -11,11 +11,7 @@ router.post("/", async (req, res) => {
   console.log("=================================");
 
   try {
-    const {
-      message,
-      ocrText,
-      documentType,
-    } = req.body;
+    const { message, ocrText, documentType } = req.body;
 
     if (!message) {
       return res.status(400).json({
@@ -28,13 +24,6 @@ router.post("/", async (req, res) => {
     const { data: services, error } = await supabase
       .from("services")
       .select("*");
-      let matchedService = null;
-
-const lowerMessage = message.toLowerCase();
-
-matchedService = services.find(service =>
-  lowerMessage.includes(service.name.toLowerCase())
-);
 
     if (error) {
       console.log("Supabase Error:", error);
@@ -47,7 +36,28 @@ matchedService = services.find(service =>
 
     console.log("Services fetched:", services.length);
 
-    // Prompt for Gemini
+    // -----------------------------
+    // Match service from user query
+    // -----------------------------
+    let matchedService = null;
+
+    const lowerMessage = message.toLowerCase();
+
+    matchedService = services.find((service) => {
+      const serviceName = service.name.toLowerCase();
+
+      return (
+        lowerMessage.includes(serviceName) ||
+        serviceName.includes(lowerMessage) ||
+        lowerMessage.includes(serviceName.split(" ")[0])
+      );
+    });
+
+    console.log("Matched Service:", matchedService);
+
+    // -----------------------------
+    // Gemini Prompt
+    // -----------------------------
     const prompt = `
 You are GovAssist AI, an AI Government Service Assistant.
 
@@ -95,9 +105,11 @@ Instructions:
     } catch (error) {
       if (error.status === 503) {
         console.log("Gemini Busy. Waiting 2 seconds...");
+
         await new Promise((resolve) => setTimeout(resolve, 2000));
 
         console.log("Retrying Gemini...");
+
         result = await model.generateContent(prompt);
       } else {
         throw error;
@@ -108,23 +120,12 @@ Instructions:
 
     console.log("Gemini Response Generated");
 
-    const lowerMessage = message.toLowerCase();
-
-const shouldShowApplyButton =
-  lowerMessage.includes("certificate") ||
-  lowerMessage.includes("income") ||
-  lowerMessage.includes("caste") ||
-  lowerMessage.includes("residence") ||
-  lowerMessage.includes("apply");
-
-return res.json({
-    success: true,
-    reply: response,
-
-    serviceId: matchedService ? matchedService.id : null,
-
-    serviceName: matchedService ? matchedService.name : null
-});
+    return res.json({
+      success: true,
+      reply: response,
+      serviceId: matchedService ? matchedService.id : null,
+      serviceName: matchedService ? matchedService.name : null,
+    });
 
   } catch (error) {
     console.error("Chat Route Error:");
@@ -138,11 +139,11 @@ return res.json({
       });
     }
 
-    return res.json({
-  success: true,
-  reply: response,
-  serviceId: matchedService ? matchedService.id : null,
-  serviceName: matchedService ? matchedService.name : null,
+    return res.status(500).json({
+      success: false,
+      message: error.message || "Internal Server Error",
+    });
+  }
 });
 
 module.exports = router;
