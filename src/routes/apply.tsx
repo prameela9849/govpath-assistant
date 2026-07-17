@@ -12,6 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { getService } from "@/lib/services-data";
 import { MOCK_USER } from "@/lib/mock-user";
 import { toast } from "sonner";
+import { saveApplication } from "@/services/application";
 
 const searchSchema = z.object({ service: z.string().optional() });
 
@@ -39,16 +40,37 @@ function ApplyPage() {
   });
   const [submitting, setSubmitting] = useState(false);
 
-  function submit(e: React.FormEvent) {
-    e.preventDefault();
-    setSubmitting(true);
-    // TODO: POST to Supabase `applications` table via a server function.
-    setTimeout(() => {
-      toast.success("Application submitted!");
-      navigate({ to: "/tracker" });
-    }, 800);
-  }
+  async function submit(e: React.FormEvent) {
+  e.preventDefault();
 
+  setSubmitting(true);
+
+  try {
+
+    await saveApplication({
+      service_name: svc?.name || "Unknown Service",
+      form_data: form,
+      status: "Submitted",
+    });
+
+    toast.success("Application Submitted Successfully!");
+
+    navigate({
+      to: "/tracker",
+    });
+
+  } catch (err) {
+
+    console.error(err);
+
+    toast.error("Unable to submit application");
+
+  } finally {
+
+    setSubmitting(false);
+
+  }
+}
   return (
     <AppShell>
       <PageHeader

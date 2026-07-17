@@ -90,19 +90,7 @@ function ChatPage() {
   ocrText,
   documentType
 );
-
-      let serviceId: string | undefined;
-
-      const lowerReply = result.reply.toLowerCase();
-
-      const matchedService = SERVICES.find((service) =>
-        lowerReply.includes(service.name.toLowerCase())
-      );
-
-      if (matchedService) {
-        serviceId = matchedService.id;
-      }
-
+const serviceId = result.serviceId || undefined;
       setMessages((m) => [
         ...m.filter((x) => x.id !== "typing"),
         {

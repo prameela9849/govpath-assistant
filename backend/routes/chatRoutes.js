@@ -28,6 +28,13 @@ router.post("/", async (req, res) => {
     const { data: services, error } = await supabase
       .from("services")
       .select("*");
+      let matchedService = null;
+
+const lowerMessage = message.toLowerCase();
+
+matchedService = services.find(service =>
+  lowerMessage.includes(service.name.toLowerCase())
+);
 
     if (error) {
       console.log("Supabase Error:", error);
@@ -111,10 +118,12 @@ const shouldShowApplyButton =
   lowerMessage.includes("apply");
 
 return res.json({
-  success: true,
-  reply: response,
-  showApplyButton: shouldShowApplyButton,
-  serviceName: message,
+    success: true,
+    reply: response,
+
+    serviceId: matchedService ? matchedService.id : null,
+
+    serviceName: matchedService ? matchedService.name : null
 });
 
   } catch (error) {
