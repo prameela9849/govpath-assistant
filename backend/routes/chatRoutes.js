@@ -101,10 +101,21 @@ Instructions:
 
     console.log("Gemini Response Generated");
 
-    return res.json({
-      success: true,
-      reply: response,
-    });
+    const lowerMessage = message.toLowerCase();
+
+const shouldShowApplyButton =
+  lowerMessage.includes("certificate") ||
+  lowerMessage.includes("income") ||
+  lowerMessage.includes("caste") ||
+  lowerMessage.includes("residence") ||
+  lowerMessage.includes("apply");
+
+return res.json({
+  success: true,
+  reply: response,
+  showApplyButton: shouldShowApplyButton,
+  serviceName: message,
+});
 
   } catch (error) {
     console.error("Chat Route Error:");
