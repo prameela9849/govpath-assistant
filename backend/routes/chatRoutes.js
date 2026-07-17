@@ -138,11 +138,11 @@ return res.json({
       });
     }
 
-    return res.status(500).json({
-      success: false,
-      message: error.message || "Internal Server Error",
-    });
-  }
+    return res.json({
+  success: true,
+  reply: response,
+  serviceId: matchedService ? matchedService.id : null,
+  serviceName: matchedService ? matchedService.name : null,
 });
 
 module.exports = router;
